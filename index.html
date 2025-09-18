@@ -31,6 +31,7 @@
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px #660000;
+      width: 360px;
     }
     table {
       width: 100%;
@@ -137,24 +138,28 @@
           <option value="Troca de Plano">Troca de Plano</option>
         </select>
 
-        <div id="camposPlano">
+        <div id="camposPlanoAtual">
           <label>Plano Atual:</label>
-          <select id="plano">
+          <select id="planoAtual">
             <option value="3.30">SEA CONNECT — 500MB (R$3,30/dia)</option>
             <option value="3.90">SEA SUPER — 600MB (R$3,90/dia)</option>
-            <option value="4.80">SEA HIPER — 700MB (R$4,80/dia)</option>
-          </select>
-
-          <label>Novo Plano:</label>
-          <select id="novoPlano">
-            <option value="3.30">SEA CONNECT — 500MB (R$3,30/dia)</option>
-            <option value="3.90">SEA SUPER — 600MB (R$3,90/dia)</option>
-            <option value="4.80">SEA HIPER — 700MB (R$4,80/dia)</option>
+            <option value="4.90">SEA MASTER — 700MB (R$4,90/dia)</option>
+            <option value="6.90">SEA ULTRA — 800MB (R$6,90/dia)</option>
           </select>
         </div>
 
-        <label>Vencimento atual:</label>
-        <select id="vencimento">
+        <div id="camposNovoPlano">
+          <label>Novo Plano:</label>
+          <select id="planoNovo">
+            <option value="3.30">SEA CONNECT — 500MB (R$3,30/dia)</option>
+            <option value="3.90">SEA SUPER — 600MB (R$3,90/dia)</option>
+            <option value="4.90">SEA MASTER — 700MB (R$4,90/dia)</option>
+            <option value="6.90">SEA ULTRA — 800MB (R$6,90/dia)</option>
+          </select>
+        </div>
+
+        <label>Vencimento Atual:</label>
+        <select id="vencimentoAtual">
           <option value="05">05</option>
           <option value="10">10</option>
           <option value="15">15</option>
@@ -163,11 +168,25 @@
           <option value="30">30</option>
         </select>
 
+        <div id="camposNovoVencimento">
+          <label>Novo Vencimento:</label>
+          <select id="novoVencimento">
+            <option value="05">05</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+          </select>
+        </div>
+
         <label>Mês/ano do ciclo:</label>
         <input type="month" id="mes">
 
-        <label>Data da troca:</label>
-        <input type="date" id="dataTroca">
+        <div id="campoDataTroca">
+          <label>Data da Troca:</label>
+          <input type="date" id="dataTroca">
+        </div>
 
         <button onclick="calcular()">Calcular ajuste</button>
 
@@ -180,13 +199,15 @@
 <script>
 function atualizarCampos() {
   const tipo = document.getElementById("tipo").value;
-  document.getElementById("camposPlano").style.display = (tipo === "Troca de Plano") ? "block" : "none";
+  document.getElementById("camposNovoPlano").style.display = (tipo === "Troca de Plano") ? "block" : "none";
+  document.getElementById("camposNovoVencimento").style.display = (tipo === "Troca de Vencimento") ? "block" : "none";
+  document.getElementById("campoDataTroca").style.display = (tipo === "Troca de Plano") ? "block" : "none";
 }
 
 function calcular() {
   const tipo = document.getElementById("tipo").value;
   const mes = document.getElementById("mes").value;
-  const dataTroca = document.getElementById("dataTroca").value;
+  const planoAtual = parseFloat(document.getElementById("planoAtual").value);
 
   if (!mes) {
     alert("Selecione o mês/ano do ciclo.");
@@ -197,44 +218,53 @@ function calcular() {
   const inicio = new Date(ano, mesNum - 1, 1);
   const fim = new Date(ano, mesNum, 0);
 
-  if (tipo === "Troca de Plano" && dataTroca) {
-    const planoAntigo = parseFloat(document.getElementById("plano").value);
-    const planoNovo = parseFloat(document.getElementById("novoPlano").value);
+  if (tipo === "Troca de Plano") {
+    const planoNovo = parseFloat(document.getElementById("planoNovo").value);
+    const dataTroca = document.getElementById("dataTroca").value;
+    if (!dataTroca) {
+      alert("Selecione a data da troca.");
+      return;
+    }
     const troca = new Date(dataTroca);
-    const diaAnterior = new Date(troca);
-    diaAnterior.setDate(troca.getDate() - 1);
 
-    const diasAntigo = (diaAnterior - inicio) / (1000 * 60 * 60 * 24) + 1;
-    const diasNovo = (fim - troca) / (1000 * 60 * 60 * 24) + 1;
+    const diasAntigo = (troca.getDate() - 1); // até dia anterior
+    const diasNovo = (fim.getDate() - troca.getDate() + 1); // do dia da troca até fim
 
     document.getElementById("resumo").innerHTML = `
       <h3>Resumo:</h3>
       Ciclo: ${inicio.toLocaleDateString()} até ${fim.toLocaleDateString()}<br>
       Troca em: ${troca.toLocaleDateString()}<br>
-      Plano antigo: R$${planoAntigo.toFixed(2)}/dia<br>
+      Plano antigo: R$${planoAtual.toFixed(2)}/dia<br>
       Novo plano: R$${planoNovo.toFixed(2)}/dia
     `;
 
     document.getElementById("resultado").innerHTML = `
       <h3>Resultado:</h3>
-      ${diasAntigo} dias × R$${planoAntigo.toFixed(2)} = R$${(diasAntigo * planoAntigo).toFixed(2)}<br>
+      ${diasAntigo} dias × R$${planoAtual.toFixed(2)} = R$${(diasAntigo * planoAtual).toFixed(2)}<br>
       ${diasNovo} dias × R$${planoNovo.toFixed(2)} = R$${(diasNovo * planoNovo).toFixed(2)}<br>
       <hr>
-      <b>Total: R$${((diasAntigo * planoAntigo) + (diasNovo * planoNovo)).toFixed(2)}</b>
+      <b>Total: R$${((diasAntigo * planoAtual) + (diasNovo * planoNovo)).toFixed(2)}</b>
     `;
-  } else if (tipo === "Troca de Vencimento") {
-    const plano = 3.90; // valor fixo só para vencimento (pode alterar se precisar)
+  }
+
+  if (tipo === "Troca de Vencimento") {
+    const vencAtual = document.getElementById("vencimentoAtual").value;
+    const novoVenc = document.getElementById("novoVencimento").value;
+
     const dias = (fim - inicio) / (1000 * 60 * 60 * 24) + 1;
 
     document.getElementById("resumo").innerHTML = `
       <h3>Resumo:</h3>
       Ciclo ajustado: ${inicio.toLocaleDateString()} até ${fim.toLocaleDateString()}<br>
-      Valor diário: R$${plano.toFixed(2)}<br>
+      Plano atual: R$${planoAtual.toFixed(2)}/dia<br>
+      Vencimento atual: ${vencAtual}<br>
+      Novo vencimento: ${novoVenc}<br>
       Dias totais: ${dias}
     `;
+
     document.getElementById("resultado").innerHTML = `
       <h3>Resultado:</h3>
-      ${dias} dias × R$${plano.toFixed(2)} = R$${(dias * plano).toFixed(2)}
+      ${dias} dias × R$${planoAtual.toFixed(2)} = R$${(dias * planoAtual).toFixed(2)}
     `;
   }
 }

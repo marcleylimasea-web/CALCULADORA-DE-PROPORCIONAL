@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora de Ajuste</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      color: #ff3333;
+    }
+    .criador {
+      text-align: center;
+      font-size: 13px;
+      margin-bottom: 10px;
+      color: #bbb;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+    .box {
+      background: #1a0000;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #660000;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #660000;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #cc0000;
+      color: #fff;
+    }
+    .legenda {
+      margin-top: 14px;
+      font-size: 14px;
+      color: #ddd;
+    }
+    .legenda div {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .legenda-vermelho, .legenda-amarelo {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+      border-radius: 3px;
+    }
+    .legenda-vermelho { background: red; }
+    .legenda-amarelo { background: yellow; }
+    select, input {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border-radius: 5px;
+      border: none;
+      color: white;
+      background: black;
+    }
+    input[type="date"], input[type="month"] {
+      background: white;
+      color: black;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #ff3333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .resultado {
+      margin-top: 15px;
+      padding: 12px;
+      background: #330000;
+      border-radius: 8px;
+    }
+    .resultado h3 {
+      margin: 0 0 10px;
+      color: #ff3333;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="criador">CRIADOR: Marcley Lima</div>
+    <div class="container">
+      <!-- TABELA -->
+      <div class="box">
+        <h2>Tabela de Vencimentos</h2>
+        <table>
+          <tr><th>Vencimento</th><th>Abertura</th><th>Fechamento</th></tr>
+          <tr><td>05</td><td>01</td><td>30</td></tr>
+          <tr><td>10</td><td>01</td><td>30</td></tr>
+          <tr><td>15</td><td>11</td><td>10</td></tr>
+          <tr><td>20</td><td>11</td><td>10</td></tr>
+          <tr><td>25</td><td>21</td><td>20</td></tr>
+          <tr><td>30</td><td>21</td><td>20</td></tr>
+        </table>
+        <div class="legenda">
+          <div><span class="legenda-vermelho"></span> Vencimento atual</div>
+          <div><span class="legenda-amarelo"></span> Novo vencimento</div>
+          <p><b>Importante:</b> o próximo boleto já virá no <b>novo vencimento</b> escolhido.</p>
+        </div>
+      </div>
+
+      <!-- CALCULADORA -->
+      <div class="box">
+        <h2>Calculadora de Ajuste</h2>
+        <label>Tipo de cálculo:</label>
+        <select id="tipo" onchange="atualizarCampos()">
+          <option value="Troca de Vencimento">Troca de Vencimento</option>
+          <option value="Troca de Plano">Troca de Plano</option>
+        </select>
+
+        <div id="camposPlano">
+          <label>Plano Atual:</label>
+          <select id="plano">
+            <option value="3.30">SEA CONNECT — 500MB (R$3,30/dia)</option>
+            <option value="3.90">SEA SUPER — 600MB (R$3,90/dia)</option>
+            <option value="4.80">SEA HIPER — 700MB (R$4,80/dia)</option>
+          </select>
+
+          <label>Novo Plano:</label>
+          <select id="novoPlano">
+            <option value="3.30">SEA CONNECT — 500MB (R$3,30/dia)</option>
+            <option value="3.90">SEA SUPER — 600MB (R$3,90/dia)</option>
+            <option value="4.80">SEA HIPER — 700MB (R$4,80/dia)</option>
+          </select>
+        </div>
+
+        <label>Vencimento atual:</label>
+        <select id="vencimento">
+          <option value="05">05</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+          <option value="30">30</option>
+        </select>
+
+        <label>Mês/ano do ciclo:</label>
+        <input type="month" id="mes">
+
+        <label>Data da troca:</label>
+        <input type="date" id="dataTroca">
+
+        <button onclick="calcular()">Calcular ajuste</button>
+
+        <div id="resumo" class="resultado"></div>
+        <div id="resultado" class="resultado"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+function atualizarCampos() {
+  const tipo = document.getElementById("tipo").value;
+  document.getElementById("camposPlano").style.display = (tipo === "Troca de Plano") ? "block" : "none";
+}
+
+function calcular() {
+  const tipo = document.getElementById("tipo").value;
+  const mes = document.getElementById("mes").value;
+  const dataTroca = document.getElementById("dataTroca").value;
+
+  if (!mes) {
+    alert("Selecione o mês/ano do ciclo.");
+    return;
+  }
+
+  const [ano, mesNum] = mes.split("-");
+  const inicio = new Date(ano, mesNum - 1, 1);
+  const fim = new Date(ano, mesNum, 0);
+
+  if (tipo === "Troca de Plano" && dataTroca) {
+    const planoAntigo = parseFloat(document.getElementById("plano").value);
+    const planoNovo = parseFloat(document.getElementById("novoPlano").value);
+    const troca = new Date(dataTroca);
+    const diaAnterior = new Date(troca);
+    diaAnterior.setDate(troca.getDate() - 1);
+
+    const diasAntigo = (diaAnterior - inicio) / (1000 * 60 * 60 * 24) + 1;
+    const diasNovo = (fim - troca) / (1000 * 60 * 60 * 24) + 1;
+
+    document.getElementById("resumo").innerHTML = `
+      <h3>Resumo:</h3>
+      Ciclo: ${inicio.toLocaleDateString()} até ${fim.toLocaleDateString()}<br>
+      Troca em: ${troca.toLocaleDateString()}<br>
+      Plano antigo: R$${planoAntigo.toFixed(2)}/dia<br>
+      Novo plano: R$${planoNovo.toFixed(2)}/dia
+    `;
+
+    document.getElementById("resultado").innerHTML = `
+      <h3>Resultado:</h3>
+      ${diasAntigo} dias × R$${planoAntigo.toFixed(2)} = R$${(diasAntigo * planoAntigo).toFixed(2)}<br>
+      ${diasNovo} dias × R$${planoNovo.toFixed(2)} = R$${(diasNovo * planoNovo).toFixed(2)}<br>
+      <hr>
+      <b>Total: R$${((diasAntigo * planoAntigo) + (diasNovo * planoNovo)).toFixed(2)}</b>
+    `;
+  } else if (tipo === "Troca de Vencimento") {
+    const plano = 3.90; // valor fixo só para vencimento (pode alterar se precisar)
+    const dias = (fim - inicio) / (1000 * 60 * 60 * 24) + 1;
+
+    document.getElementById("resumo").innerHTML = `
+      <h3>Resumo:</h3>
+      Ciclo ajustado: ${inicio.toLocaleDateString()} até ${fim.toLocaleDateString()}<br>
+      Valor diário: R$${plano.toFixed(2)}<br>
+      Dias totais: ${dias}
+    `;
+    document.getElementById("resultado").innerHTML = `
+      <h3>Resultado:</h3>
+      ${dias} dias × R$${plano.toFixed(2)} = R$${(dias * plano).toFixed(2)}
+    `;
+  }
+}
+</script>
+</body>
+</html>

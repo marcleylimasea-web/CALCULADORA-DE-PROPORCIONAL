@@ -1,218 +1,422 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
   <title>Calculadora de Ajuste</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #1a1a1a, #330000, #660000, #800000);
-      color: white;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-h1 {
-  margin: 20px 0;
-  font-size: 20px;      /* tamanho da fonte */
-  font-weight: normal;  /* peso da fonte (pode ser bold, se quiser) */
-  color: #ccc;          /* cor do texto */
-  text-align: center;   /* centraliza o texto */
+    :root{
+      --bg:#111;
+      --panel:#1a0000;
+      --box:#330000;
+      --accent:#ff3333;
+      --black-input:#000;
+      --date-bg: #140606; /* tom levemente diferente do input preto */
+      --white:#eee;
+      --muted:#bbb;
     }
 
-    .container {
-      display: flex;
-      gap: 40px; /* espaço entre tabela e calculadora */
-      margin-top: 20px;
-      flex-wrap: wrap; /* em telas pequenas quebra */
-      justify-content: center;
-      width: 100%;
-      max-width: 1200px;
+    *{box-sizing: border-box;}
+
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--white);
+      font-family:Arial,Helvetica,sans-serif;
+      display:flex;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .page {
+      width:100%;
+      max-width:1150px;
+      margin:0 auto;
+    }
+
+    .criador { text-align:center; color:var(--muted); margin-bottom:14px; font-weight:600; }
+
+    .container{
+      display:flex;
+      gap:24px;
+      align-items:flex-start;
+      width:100%;
     }
 
     .box {
-      background: #1a0000;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.5);
-      flex: 1;
-      min-width: 320px;
-      max-width: 500px;
+      background:var(--panel);
+      padding:18px;
+      border-radius:12px;
+      border:1px solid rgba(255,0,0,0.17);
+      box-shadow:0 8px 28px rgba(0,0,0,0.6), 0 0 16px rgba(153,0,0,0.12) inset;
     }
 
-    h2 {
-      color: red;
-      text-align: center;
-      margin-bottom: 20px;
+    /* left table (fixa) */
+    .tabela{ flex:0 0 46%; min-width:320px; }
+    .calc{ flex:0 0 54%; min-width:360px; }
+
+    .tabela h2, .calc h2 { text-align:center; color:var(--accent); margin:0 0 12px; }
+
+    table{ width:100%; border-collapse:collapse; background:transparent; border-radius:8px; overflow:hidden; }
+    thead th{ background:#cc0000; color:#fff; padding:12px 10px; font-weight:700; text-align:center; }
+    th, td { border:1px solid rgba(102,0,0,0.9); padding:10px 12px; text-align:center; vertical-align:middle; }
+    tbody tr:nth-child(even){ background: rgba(255,0,0,0.03); }
+    tbody tr td { font-size:16px; }
+
+    /* highlight rows */
+    tbody tr.venc-atual { background: rgba(255,0,0,0.18) !important; color:#fff; font-weight:700; }
+    tbody tr.venc-novo  { background: rgba(255,235,59,0.85) !important; color:#000; font-weight:700; }
+
+    .legenda{ margin-top:14px; color:#ddd; font-size:14px; }
+    .legenda div{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .legenda .dot { width:16px; height:16px; border-radius:3px; display:inline-block; border:1px solid #333; }
+    .dot.red{ background:red; }
+    .dot.yellow{ background:yellow; }
+
+    /* inputs / selects */
+    label{ display:block; margin-top:10px; color:#ddd; font-size:14px; }
+    select, input[type="text"], input[type="date"], input[type="month"], input {
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.06);
+      background:var(--black-input);
+      color:var(--white);
+      box-sizing:border-box;
+      font-size:14px;
     }
 
-    /* Tabela */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: center;
+    /* date/month slightly different so it's not pure black */
+    input[type="month"], input[type="date"]{
+      background:var(--date-bg);
+      color:var(--white);
+      border:1px solid rgba(255,0,0,0.09);
     }
 
-    th, td {
-      border: 1px solid #550000;
-      padding: 8px;
-    }
-
-    th {
-      background: red;
-      color: white;
-    }
-
-    /* Inputs */
-    select, input[type="text"], input[type="date"], input[type="month"] {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: none;
-      border-radius: 6px;
-      background: #000;
-      color: white;
-    }
-}
-
-/* Ícone do calendário */
-input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1) brightness(2); /* branco mais forte */
-    cursor: pointer;
-}
-input[type="month"]::-webkit-calendar-picker-indicator {
-    filter: invert(1) brightness(2); /* deixa o ícone branco */
-    cursor: pointer;
-}
-    /* Botão */
-    button {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      background: red;
-      color: white;
-      font-weight: bold;
+    /* calendar icon readable */
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="month"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) contrast(1.2);
       cursor: pointer;
-      transition: background 0.3s;
     }
 
-    button:hover {
-      background: darkred;
+    /* custom dropdown arrow for select */
+    select {
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      appearance:none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--white) 50%),
+        linear-gradient(135deg, var(--white) 50%, transparent 50%);
+      background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right:34px;
     }
 
-    /* Resumo */
-    #resumo {
-      margin-top: 15px;
-      padding: 10px;
-      background: #220000;
-      border-radius: 8px;
+    select:focus, input:focus { outline:none; box-shadow:0 0 8px rgba(255,0,0,0.12); border-color: rgba(255,0,0,0.28); }
+
+    button{
+      margin-top:14px;
+      width:100%;
+      padding:12px;
+      border-radius:8px;
+      border:1px solid rgba(255,0,0,0.18);
+      background:var(--accent);
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+      font-size:15px;
+    }
+    button:hover{ background:#ff5555; transform: translateY(-1px); }
+
+    .resultado{
+      margin-top:16px;
+      background:var(--box);
+      padding:14px;
+      border-radius:8px;
+      color:var(--white);
+      border:1px solid rgba(255,0,0,0.14);
+    }
+    .resultado h3{ color:var(--accent); margin:0 0 8px 0; }
+    hr{ border:none; border-top:1px solid rgba(255,255,255,0.06); margin:8px 0; }
+
+    /* mobile */
+    @media (max-width:900px){
+      .container{ flex-direction:column; gap:18px; }
+      .tabela, .calc { flex: 1 1 auto; min-width: auto; width:100%; }
     }
   </style>
 </head>
 <body>
-  <h1>CRIADOR: Marcley Lima</h1>
+  <div class="page">
+    <div class="criador">CRIADOR: Marcley Lima</div>
 
-  <div class="container">
-    <!-- Caixa da Tabela -->
-    <div class="box">
-      <h2>Tabela de Vencimentos</h2>
-      <table>
-        <tr><th>Vencimento</th><th>Abertura</th><th>Fechamento</th></tr>
-        <tr><td>05</td><td>01</td><td>30</td></tr>
-        <tr><td>10</td><td>01</td><td>30</td></tr>
-        <tr><td>15</td><td>11</td><td>10</td></tr>
-        <tr><td>20</td><td>11</td><td>10</td></tr>
-        <tr><td>25</td><td>21</td><td>20</td></tr>
-        <tr><td>30</td><td>21</td><td>20</td></tr>
-      </table>
-      <br>
-      <p>
-        <span style="color:red;">■</span> Vencimento atual<br>
-        <span style="color:yellow;">■</span> Novo vencimento
-      </p>
-      <p><b>Importante:</b> o próximo boleto já virá no <b>novo vencimento</b> escolhido.</p>
-    </div>
+    <div class="container">
 
-    <!-- Caixa da Calculadora -->
-    <div class="box">
-      <h2>Calculadora de Ajuste</h2>
+      <!-- TABELA FIXA -->
+      <div class="box tabela">
+        <h2>Tabela de Vencimentos</h2>
+        <table>
+          <thead>
+            <tr><th>Vencimento</th><th>Abertura</th><th>Fechamento</th></tr>
+          </thead>
+          <tbody id="tabelaBody">
+            <tr data-venc="05"><td>05</td><td>01</td><td>30</td></tr>
+            <tr data-venc="10"><td>10</td><td>01</td><td>30</td></tr>
+            <tr data-venc="15"><td>15</td><td>11</td><td>10</td></tr>
+            <tr data-venc="20"><td>20</td><td>11</td><td>10</td></tr>
+            <tr data-venc="25"><td>25</td><td>21</td><td>20</td></tr>
+            <tr data-venc="30"><td>30</td><td>21</td><td>20</td></tr>
+          </tbody>
+        </table>
 
-      <label>Tipo de cálculo:</label>
-      <select id="tipoCalculo" onchange="toggleCampos()">
-        <option value="plano">Troca de Plano</option>
-        <option value="vencimento">Troca de Vencimento</option>
-      </select>
+        <div class="legenda">
+          <div><span class="dot red"></span> Vencimento atual</div>
+          <div><span class="dot yellow"></span> Novo vencimento</div>
+          <p><strong>Importante:</strong> o próximo boleto já virá no <b>novo vencimento</b> escolhido.</p>
+        </div>
+      </div>
 
-      <label>Plano Atual:</label>
-      <select id="planoAtual">
-        <option value="3.30">SEA CONNECT — 500MB (R$3,30/dia)</option>
-        <option value="3.90">SEA SUPER — 600MB (R$3,90/dia)</option>
-        <option value="4.80">SEA HIPER — 700MB (R$4,80/dia)</option>
-        <option value="6.90">SEA ULTRA — 800MB (R$6,90/dia)</option>
-      </select>
+      <!-- CALCULADORA -->
+      <div class="box calc">
+        <h2>Calculadora de Ajuste</h2>
 
-      <div id="campoPlanoNovo">
-        <label>Novo Plano:</label>
-        <select id="planoNovo">
+        <label>Tipo de cálculo:</label>
+        <select id="tipo" onchange="atualizarCampos()">
+          <option value="venc">Troca de Vencimento</option>
+          <option value="plano">Troca de Plano</option>
+        </select>
+
+        <label>Plano Atual:</label>
+        <select id="planoAtual">
           <option value="3.30">SEA CONNECT — 500MB (R$3,30/dia)</option>
           <option value="3.90">SEA SUPER — 600MB (R$3,90/dia)</option>
-          <option value="4.80">SEA HIPER — 700MB (R$4,80/dia)</option>
+          <option value="4.80">SEA MASTER — 700MB (R$4,80/dia)</option>
           <option value="6.90">SEA ULTRA — 800MB (R$6,90/dia)</option>
         </select>
-      </div>
 
-      <label>Vencimento Atual:</label>
-      <select id="vencimentoAtual">
-        <option>05</option><option>10</option><option>15</option>
-        <option>20</option><option>25</option><option>30</option>
-      </select>
+        <div id="grupoNovoPlano" style="display:none">
+          <label>Novo Plano:</label>
+          <select id="planoNovo">
+            <option value="3.30">SEA CONNECT — 500MB (R$3,30/dia)</option>
+            <option value="3.90">SEA SUPER — 600MB (R$3,90/dia)</option>
+            <option value="4.80">SEA MASTER — 700MB (R$4,80/dia)</option>
+            <option value="6.90">SEA ULTRA — 800MB (R$6,90/dia)</option>
+          </select>
+        </div>
 
-      <div id="campoNovoVencimento" style="display:none;">
-        <label>Novo Vencimento:</label>
-        <select id="novoVencimento">
-          <option>05</option><option>10</option><option>15</option>
-          <option>20</option><option>25</option><option>30</option>
+        <label>Vencimento Atual:</label>
+        <select id="vencimentoAtual">
+          <option value="05">05</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+          <option value="30">30</option>
         </select>
+
+        <div id="grupoNovoVenc" style="display:block">
+          <label>Novo Vencimento:</label>
+          <select id="novoVencimento">
+            <option value="05">05</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+          </select>
+        </div>
+
+        <label>Mês/ano do ciclo:</label>
+        <input id="mes" type="month" />
+
+        <div id="grupoDataTroca" style="display:none">
+          <label>Data da troca:</label>
+          <input id="dataTroca" type="date" />
+        </div>
+
+        <button onclick="calcular()">Calcular ajuste</button>
+
+        <div id="resumo" class="resultado" style="display:none"></div>
+        <div id="resultado" class="resultado" style="display:none"></div>
       </div>
-
-      <label>Mês/ano do ciclo:</label>
-      <input type="month" id="mesAno">
-
-      <div id="campoDataTroca">
-        <label>Data da Troca:</label>
-        <input type="date" id="dataTroca">
-      </div>
-
-      <button onclick="calcular()">Calcular ajuste</button>
-
-      <div id="resumo"></div>
     </div>
   </div>
 
-  <script>
-    function toggleCampos() {
-      const tipo = document.getElementById("tipoCalculo").value;
-      document.getElementById("campoPlanoNovo").style.display = tipo === "plano" ? "block" : "none";
-      document.getElementById("campoDataTroca").style.display = tipo === "plano" ? "block" : "none";
-      document.getElementById("campoNovoVencimento").style.display = tipo === "vencimento" ? "block" : "none";
+<script>
+/* --- NÃO ALTEREI A LÓGICA DE CÁLCULO --- */
+/* Apenas adicionei destaque na tabela ao final do cálculo (sem tocar nos valores/procedimentos) */
+
+const ciclos = {
+  "05": {abertura:1, fechamento:30},
+  "10": {abertura:1, fechamento:30},
+  "15": {abertura:11, fechamento:10},
+  "20": {abertura:11, fechamento:10},
+  "25": {abertura:21, fechamento:20},
+  "30": {abertura:21, fechamento:20}
+};
+
+function atualizarCampos(){
+  const tipo = document.getElementById('tipo').value;
+  document.getElementById('grupoNovoPlano').style.display = (tipo === 'plano') ? 'block' : 'none';
+  document.getElementById('grupoDataTroca').style.display = (tipo === 'plano') ? 'block' : 'none';
+  document.getElementById('grupoNovoVenc').style.display = (tipo === 'venc') ? 'block' : 'none';
+
+  // esconder resultados quando trocar modo — aparecerão ao clicar em "Calcular"
+  document.getElementById('resumo').style.display = 'none';
+  document.getElementById('resultado').style.display = 'none';
+
+  // limpar realces na tabela ao trocar tipo
+  limparRealcesTabela();
+}
+
+function getCycleDates(venc, ano, mes){
+  const def = ciclos[venc];
+  const inicio = new Date(ano, mes-1, def.abertura);
+  let fim;
+  if (def.fechamento >= def.abertura) {
+    fim = new Date(ano, mes-1, def.fechamento);
+  } else {
+    fim = new Date(ano, mes, def.fechamento);
+  }
+  inicio.setHours(0,0,0,0);
+  fim.setHours(0,0,0,0);
+  return {inicio, fim};
+}
+
+function diasInclusivos(inicio, fim){
+  const ms = 1000*60*60*24;
+  return Math.floor((fim - inicio)/ms) + 1;
+}
+
+function safeParseFloat(v){
+  const n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
+}
+
+/* limpa todas as marcações da tabela */
+function limparRealcesTabela(){
+  const rows = document.querySelectorAll('#tabelaBody tr');
+  rows.forEach(r => {
+    r.classList.remove('venc-atual','venc-novo');
+  });
+}
+
+/* aplica destaque nas linhas da tabela */
+function marcarVencimentos(antigo, novo){
+  limparRealcesTabela();
+  if(antigo){
+    const tr = document.querySelector(`#tabelaBody tr[data-venc="${antigo}"]`);
+    if(tr) tr.classList.add('venc-atual');
+  }
+  if(novo){
+    const tr2 = document.querySelector(`#tabelaBody tr[data-venc="${novo}"]`);
+    if(tr2) tr2.classList.add('venc-novo');
+  }
+}
+
+function calcular(){
+  const tipo = document.getElementById('tipo').value;
+  const mesStr = document.getElementById('mes').value;
+  if(!mesStr){
+    alert('Selecione o mês/ano do ciclo.');
+    return;
+  }
+  const [anoStr, mesStrNum] = mesStr.split('-');
+  const ano = parseInt(anoStr,10);
+  const mes = parseInt(mesStrNum,10);
+
+  const planoAtual = safeParseFloat(document.getElementById('planoAtual').value);
+  const vencAtual = document.getElementById('vencimentoAtual') ? document.getElementById('vencimentoAtual').value : document.getElementById('vencimentoAtual').value;
+
+  const cycle = getCycleDates(vencAtual, ano, mes);
+  const cicloInicio = cycle.inicio;
+  const cicloFim = cycle.fim;
+
+  const resumoEl = document.getElementById('resumo');
+  const resultadoEl = document.getElementById('resultado');
+  resumoEl.style.display = 'block';
+  resultadoEl.style.display = 'block';
+
+  if(tipo === 'venc'){
+    const novoVenc = document.getElementById('novoVencimento').value;
+    const novoCycle = getCycleDates(novoVenc, ano, mes);
+    const fimAjustado = novoCycle.fim;
+
+    const diasTotais = diasInclusivos(cicloInicio, fimAjustado);
+    const total = (diasTotais * planoAtual);
+
+    resumoEl.innerHTML = `<h3>Resumo:</h3>
+      Ciclo ajustado: ${cicloInicio.toLocaleDateString()} até ${fimAjustado.toLocaleDateString()}<br>
+      Plano atual: R$${planoAtual.toFixed(2)}/dia<br>
+      Vencimento atual: <span style="color:red;font-weight:700">${vencAtual}</span><br>
+      Novo vencimento: <span style="color:yellow;font-weight:700">${novoVenc}</span><br>
+      Dias totais: <b>${diasTotais}</b>
+    `;
+
+    resultadoEl.innerHTML = `<h3>Resultado:</h3>
+      ${diasTotais} dias × R$${planoAtual.toFixed(2)} = R$${total.toFixed(2)}
+    `;
+
+    // destacar na tabela
+    marcarVencimentos(vencAtual, novoVenc);
+
+    return;
+  }
+
+  if(tipo === 'plano'){
+    const planoNovo = safeParseFloat(document.getElementById('planoNovo').value);
+    const dataTrocaStr = document.getElementById('dataTroca').value;
+    if(!dataTrocaStr){
+      alert('Selecione a data da troca para Troca de Plano.');
+      return;
+    }
+    const troca = new Date(dataTrocaStr + 'T00:00:00');
+    troca.setHours(0,0,0,0);
+
+    const diaAnterior = new Date(troca);
+    diaAnterior.setDate(diaAnterior.getDate() - 1);
+    let diasAntigo = 0;
+    if(diaAnterior >= cicloInicio){
+      diasAntigo = diasInclusivos(cicloInicio, diaAnterior);
+    }
+    let diasNovo = 0;
+    if(troca <= cicloFim){
+      diasNovo = diasInclusivos(troca, cicloFim);
     }
 
-    function calcular() {
-      const tipo = document.getElementById("tipoCalculo").value;
-      const resumo = document.getElementById("resumo");
-      resumo.innerHTML = "<b>Resultado do cálculo:</b><br>";
+    diasAntigo = Math.max(0, Math.floor(diasAntigo));
+    diasNovo = Math.max(0, Math.floor(diasNovo));
 
-      if (tipo === "plano") {
-        resumo.innerHTML += "👉 Aqui entraria o cálculo de troca de plano.";
-      } else {
-        resumo.innerHTML += "👉 Aqui entraria o cálculo de troca de vencimento.";
-      }
-    }
-  </script>
+    const valorAntigo = diasAntigo * planoAtual;
+    const valorNovo = diasNovo * planoNovo;
+    const total = valorAntigo + valorNovo;
+
+    resumoEl.innerHTML = `<h3>Resumo:</h3>
+      Ciclo: ${cicloInicio.toLocaleDateString()} até ${cicloFim.toLocaleDateString()}<br>
+      Troca em: ${troca.toLocaleDateString()}<br>
+      Plano antigo: R$${planoAtual.toFixed(2)}/dia<br>
+      Novo plano: R$${planoNovo.toFixed(2)}/dia<br>
+      Dias: antigo <b>${diasAntigo}</b>, novo <b>${diasNovo}</b>
+    `;
+
+    resultadoEl.innerHTML = `<h3>Resultado:</h3>
+      ${diasAntigo} dias × R$${planoAtual.toFixed(2)} = R$${valorAntigo.toFixed(2)}<br>
+      ${diasNovo} dias × R$${planoNovo.toFixed(2)} = R$${valorNovo.toFixed(2)}<hr>
+      <b>Total: R$${total.toFixed(2)}</b>
+    `;
+
+    // destacar apenas o vencimento atual (não há novo vencimento na troca de plano)
+    marcarVencimentos(vencAtual, null);
+
+    return;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  atualizarCampos();
+});
+</script>
 </body>
 </html>

@@ -338,36 +338,48 @@ function calcular(){
   resumoEl.style.display = 'block';
   resultadoEl.style.display = 'block';
 
-  if(tipo === 'venc'){
-  const novoVenc = document.getElementById('novoVencimento').value;
-  const novoCycle = getCycleDates(novoVenc, ano, mes);
+  if (tipo === 'venc') {
+    // TROCA DE VENCIMENTO
+    const diasNoMes = new Date(ano, mes, 0).getDate();
+    const dataFinal = new Date(ano, mes, 0); // último dia do mês
+    let dias = Math.floor((dataFinal - dataBase) / (1000 * 60 * 60 * 24)) + 1;
 
-  let fimAjustado = novoCycle.fim;
-  let diasTotais = diasInclusivos(cicloInicio, fimAjustado);
+    if (dias < 30) {
+        dias += diasNoMes; // garante mínimo de 30 dias
+    }
 
-  // 🔒 Garante no mínimo 30 dias
-  if (diasTotais < 30) {
-    fimAjustado = new Date(
-      fimAjustado.getFullYear(),
-      fimAjustado.getMonth() + 1,
-      fimAjustado.getDate()
-    );
-    diasTotais = diasInclusivos(cicloInicio, fimAjustado);
-  }
+    const valorDiario = planoSelecionado.valor / 30;
+    const valorFinal = valorDiario * dias;
 
-  const total = (diasTotais * planoAtual) / 30;
-
-    resumoEl.innerHTML = `<h3>Resumo:</h3>
-      Ciclo ajustado: ${cicloInicio.toLocaleDateString()} até ${fimAjustado.toLocaleDateString()}<br>
-      Plano atual: R$${planoAtual.toFixed(2)}/dia<br>
-      Vencimento atual: <span style="color:red;font-weight:700">${vencAtual}</span><br>
-      Novo vencimento: <span style="color:yellow;font-weight:700">${novoVenc}</span><br>
-      Dias totais: <b>${diasTotais}</b>
+    resultadoEl.innerHTML = `
+        <p><strong>Resultado:</strong></p>
+        <p>Período: ${dias} dias</p>
+        <p>Valor diário: R$${valorDiario.toFixed(2)}</p>
+        <p><strong>Total: R$${valorFinal.toFixed(2)}</strong></p>
     `;
 
-    resultadoEl.innerHTML = `<h3>Resultado:</h3>
-      ${diasTotais} dias × R$${planoAtual.toFixed(2)} = R$${total.toFixed(2)}
+} else if (tipo === 'plano') {
+    // TROCA DE PLANO
+    const diasNoMes = new Date(ano, mes, 0).getDate();
+    const dataFinal = new Date(ano, mes, 0);
+    let dias = Math.floor((dataFinal - dataBase) / (1000 * 60 * 60 * 24)) + 1;
+
+    if (dias < 30) {
+        dias += diasNoMes; // garante mínimo de 30 dias
+    }
+
+    const valorDiarioAntigo = planoSelecionado.valor / 30;
+    const valorDiarioNovo = novoPlano.valor / 30;
+    const diferencaDiaria = valorDiarioNovo - valorDiarioAntigo;
+    const valorFinal = diferencaDiaria * dias;
+
+    resultadoEl.innerHTML = `
+        <p><strong>Resultado:</strong></p>
+        <p>Período: ${dias} dias</p>
+        <p>Diferença diária: R$${diferencaDiaria.toFixed(2)}</p>
+        <p><strong>Total: R$${valorFinal.toFixed(2)}</strong></p>
     `;
+}
 
     // destacar na tabela
     marcarVencimentos(vencAtual, novoVenc);

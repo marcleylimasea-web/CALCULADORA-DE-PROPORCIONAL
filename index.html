@@ -11,7 +11,7 @@
       --box:#330000;
       --accent:#ff3333;
       --black-input:#000;
-      --date-bg: #140606; /* tom levemente diferente do input preto */
+      --date-bg: #140606;
       --white:#eee;
       --muted:#bbb;
     }
@@ -28,12 +28,7 @@
       padding:24px;
     }
 
-    .page {
-      width:100%;
-      max-width:1150px;
-      margin:0 auto;
-    }
-
+    .page { width:100%; max-width:1150px; margin:0 auto; }
     .criador { text-align:center; color:var(--muted); margin-bottom:14px; font-weight:600; }
 
     .container{
@@ -51,19 +46,16 @@
       box-shadow:0 8px 28px rgba(0,0,0,0.6), 0 0 16px rgba(153,0,0,0.12) inset;
     }
 
-    /* left table (fixa) */
     .tabela{ flex:0 0 46%; min-width:320px; }
     .calc{ flex:0 0 54%; min-width:360px; }
-
     .tabela h2, .calc h2 { text-align:center; color:var(--accent); margin:0 0 12px; }
 
-    table{ width:100%; border-collapse:collapse; background:transparent; border-radius:8px; overflow:hidden; }
+    table{ width:100%; border-collapse:collapse; }
     thead th{ background:#cc0000; color:#fff; padding:12px 10px; font-weight:700; text-align:center; }
     th, td { border:1px solid rgba(102,0,0,0.9); padding:10px 12px; text-align:center; vertical-align:middle; }
     tbody tr:nth-child(even){ background: rgba(255,0,0,0.03); }
     tbody tr td { font-size:16px; }
 
-    /* highlight rows */
     tbody tr.venc-atual { background: rgba(255,0,0,0.18) !important; color:#fff; font-weight:700; }
     tbody tr.venc-novo  { background: rgba(255,235,59,0.85) !important; color:#000; font-weight:700; }
 
@@ -73,7 +65,6 @@
     .dot.red{ background:red; }
     .dot.yellow{ background:yellow; }
 
-    /* inputs / selects */
     label{ display:block; margin-top:10px; color:#ddd; font-size:14px; }
     select, input[type="text"], input[type="date"], input[type="month"], input {
       width:100%;
@@ -82,25 +73,20 @@
       border:1px solid rgba(255,255,255,0.06);
       background:var(--black-input);
       color:var(--white);
-      box-sizing:border-box;
       font-size:14px;
     }
 
-    /* date/month slightly different so it's not pure black */
     input[type="month"], input[type="date"]{
       background:var(--date-bg);
       color:var(--white);
       border:1px solid rgba(255,0,0,0.09);
     }
-
-    /* calendar icon readable */
     input[type="date"]::-webkit-calendar-picker-indicator,
     input[type="month"]::-webkit-calendar-picker-indicator {
       filter: invert(1) contrast(1.2);
       cursor: pointer;
     }
 
-    /* custom dropdown arrow for select */
     select {
       -webkit-appearance:none;
       -moz-appearance:none;
@@ -141,7 +127,6 @@
     .resultado h3{ color:var(--accent); margin:0 0 8px 0; }
     hr{ border:none; border-top:1px solid rgba(255,255,255,0.06); margin:8px 0; }
 
-    /* mobile */
     @media (max-width:900px){
       .container{ flex-direction:column; gap:18px; }
       .tabela, .calc { flex: 1 1 auto; min-width: auto; width:100%; }
@@ -154,7 +139,6 @@
 
     <div class="container">
 
-      <!-- TABELA FIXA -->
       <div class="box tabela">
         <h2>Tabela de Vencimentos</h2>
         <table>
@@ -178,7 +162,6 @@
         </div>
       </div>
 
-      <!-- CALCULADORA -->
       <div class="box calc">
         <h2>Calculadora de Ajuste</h2>
 
@@ -193,7 +176,7 @@
           <option value="3.30">SEA CONNECT — 500MB (R$3,30/dia)</option>
           <option value="3.90">SEA SUPER — 600MB (R$3,90/dia)</option>
           <option value="4.80">SEA MASTER — 700MB (R$4,80/dia)</option>
-          <option value="6.90">SEA ULTRA — 800MB (R$6,90/dia)</option>
+          <option value="6.30">SEA ULTRA — 800MB (R$6,30/dia)</option>
         </select>
 
         <div id="grupoNovoPlano" style="display:none">
@@ -202,7 +185,7 @@
             <option value="3.30">SEA CONNECT — 500MB (R$3,30/dia)</option>
             <option value="3.90">SEA SUPER — 600MB (R$3,90/dia)</option>
             <option value="4.80">SEA MASTER — 700MB (R$4,80/dia)</option>
-            <option value="6.90">SEA ULTRA — 800MB (R$6,90/dia)</option>
+            <option value="6.30">SEA ULTRA — 800MB (R$6,30/dia)</option>
           </select>
         </div>
 
@@ -322,16 +305,69 @@ function calcular(){
 
   const planoAtual = safeParseFloat(document.getElementById('planoAtual').value);
   const vencAtual = document.getElementById('vencimentoAtual').value;
-  const cycle = getCycleDates(vencAtual, ano, mes);
-  const cicloInicio = cycle.inicio;
-  const cicloFim = cycle.fim;
 
   const resumoEl = document.getElementById('resumo');
   const resultadoEl = document.getElementById('resultado');
   resumoEl.style.display = 'block';
   resultadoEl.style.display = 'block';
 
-  // TODO: lógica de cálculo segue aqui...
+  if(tipo === "venc"){
+    const novoVenc = document.getElementById('novoVencimento').value;
+    marcarVencimentos(vencAtual, novoVenc);
+
+    const cicloAtual = getCycleDates(vencAtual, ano, mes);
+    const cicloNovo = getCycleDates(novoVenc, ano, mes);
+
+    let diasTotais = diasInclusivos(cicloAtual.inicio, cicloNovo.fim);
+    if(diasTotais < 30) diasTotais += 30;
+
+    const total = diasTotais * planoAtual;
+
+    resumoEl.innerHTML = `
+      <h3>Resumo:</h3>
+      Ciclo ajustado: ${cicloAtual.inicio.toLocaleDateString()} até ${cicloNovo.fim.toLocaleDateString()}<br>
+      Plano atual: R$${planoAtual.toFixed(2)}/dia<br>
+      Vencimento atual: <span style="color:red">${vencAtual}</span><br>
+      Novo vencimento: <span style="color:yellow">${novoVenc}</span><br>
+      Dias totais: ${diasTotais}
+    `;
+
+    resultadoEl.innerHTML = `
+      <h3>Resultado:</h3>
+      ${diasTotais} dias × R$${planoAtual.toFixed(2)} = <b>R$${total.toFixed(2)}</b>
+    `;
+
+  } else if(tipo === "plano"){
+    const planoNovo = safeParseFloat(document.getElementById('planoNovo').value);
+    const dataTrocaStr = document.getElementById('dataTroca').value;
+    if(!dataTrocaStr){
+      alert("Selecione a data da troca de plano.");
+      return;
+    }
+    const dataTroca = new Date(dataTrocaStr);
+    dataTroca.setHours(0,0,0,0);
+
+    const ciclo = getCycleDates(vencAtual, ano, mes);
+    const cicloInicio = ciclo.inicio;
+    const cicloFim = ciclo.fim;
+
+    const diasAntigo = diasInclusivos(cicloInicio, dataTroca);
+    const diasNovo = diasInclusivos(new Date(dataTroca.getTime()+86400000), cicloFim);
+
+    const total = (diasAntigo * planoAtual) + (diasNovo * planoNovo);
+
+    resumoEl.innerHTML = `
+      <h3>Resumo:</h3>
+      Ciclo: ${cicloInicio.toLocaleDateString()} até ${cicloFim.toLocaleDateString()}<br>
+      Plano antigo: R$${planoAtual.toFixed(2)}/dia (${diasAntigo} dias)<br>
+      Plano novo: R$${planoNovo.toFixed(2)}/dia (${diasNovo} dias)<br>
+    `;
+
+    resultadoEl.innerHTML = `
+      <h3>Resultado:</h3>
+      (${diasAntigo} × R$${planoAtual.toFixed(2)}) + (${diasNovo} × R$${planoNovo.toFixed(2)}) = <b>R$${total.toFixed(2)}</b>
+    `;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

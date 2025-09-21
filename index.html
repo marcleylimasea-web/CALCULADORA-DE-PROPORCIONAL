@@ -332,7 +332,10 @@ function calcular(){
 
   const cycle = getCycleDates(vencAtual, ano, mes);
   const cicloInicio = cycle.inicio;
-  const cicloFim = cycle.fim;
+  let fimAjustado = novoCycle.fim;
+const dias = diasInclusivos(cicloInicio, fimAjustado);
+  fimAjustado = new Date(fimAjustado.getFullYear(), fimAjustado.getMonth()+1, fimAjustado.getDate());
+}
 
   const resumoEl = document.getElementById('resumo');
   const resultadoEl = document.getElementById('resultado');

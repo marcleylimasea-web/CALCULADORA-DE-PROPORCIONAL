@@ -340,12 +340,23 @@ function calcular(){
   resultadoEl.style.display = 'block';
 
   if(tipo === 'venc'){
-    const novoVenc = document.getElementById('novoVencimento').value;
-    const novoCycle = getCycleDates(novoVenc, ano, mes);
-    const fimAjustado = novoCycle.fim;
+  const novoVenc = document.getElementById('novoVenc').value;
+  const novoCycle = getCycleDates(novoVenc, ano, mes);
 
-    const diasTotais = diasInclusivos(cicloInicio, fimAjustado);
-    const total = (diasTotais * planoAtual);
+  let fimAjustado = novoCycle.fim;
+  let diasTotais = diasInclusivos(cicloInicio, fimAjustado);
+
+  // 🔒 Garante no mínimo 30 dias
+  if (diasTotais < 30) {
+    fimAjustado = new Date(
+      fimAjustado.getFullYear(),
+      fimAjustado.getMonth() + 1,
+      fimAjustado.getDate()
+    );
+    diasTotais = diasInclusivos(cicloInicio, fimAjustado);
+  }
+
+  const total = (diasTotais * planoAtual) / 30;
 
     resumoEl.innerHTML = `<h3>Resumo:</h3>
       Ciclo ajustado: ${cicloInicio.toLocaleDateString()} até ${fimAjustado.toLocaleDateString()}<br>

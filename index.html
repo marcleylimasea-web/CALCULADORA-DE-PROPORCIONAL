@@ -328,8 +328,7 @@ function calcular(){
   const mes = parseInt(mesStrNum,10);
 
   const planoAtual = safeParseFloat(document.getElementById('planoAtual').value);
-  const vencAtual = document.getElementById('vencimentoAtual') ? document.getElementById('vencimentoAtual').value : document.getElementById('vencimentoAtual').value;
-
+  const vencAtual = document.getElementById('vencimentoAtual').value;
   const cycle = getCycleDates(vencAtual, ano, mes);
   const cicloInicio = cycle.inicio;
   const cicloFim = cycle.fim;
@@ -340,7 +339,7 @@ function calcular(){
   resultadoEl.style.display = 'block';
 
   if(tipo === 'venc'){
-  const novoVenc = document.getElementById('novoVenc').value;
+  const novoVenc = document.getElementById('novoVencimento').value;
   const novoCycle = getCycleDates(novoVenc, ano, mes);
 
   let fimAjustado = novoCycle.fim;
